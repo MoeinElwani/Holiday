@@ -22,13 +22,18 @@
     "core-js": "^2.5.3",
     "moment": "^2.22.1",
     "vue": "^2.5.16",
+    "vue-barcode-scanner": "^0.6.0",
     "vue-blockui": "^1.1.7",
+    "vue-date-format": "^1.1.2",
+    "vue-focus": "^2.1.0",
     "vue-moment": "^4.0.0-0",
     "vue-router": "^2.8.1",
     "vue-server-renderer": "^2.5.16",
     "vue-template-compiler": "^2.5.16",
+    "vuejs-datepicker": "^1.5.2",
     "vuex": "^2.5.0",
-    "vuex-router-sync": "^4.3.2"
+    "vuex-router-sync": "^4.3.2",
+    "webpack-dev-server": "^2.9.1"
   },
   "devDependencies": {
     "@fortawesome/fontawesome": "^1.1.8",

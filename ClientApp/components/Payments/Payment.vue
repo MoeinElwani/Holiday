@@ -17,37 +17,38 @@
       </h1>
     </div>
     <template v-if="!show" >
-      <b-card bg-variant="light" 
+      <b-card align="right" bg-variant="light" 
                 >
        
       
-    <table class="table borderd">
+    <table class="table table-striped">
       <thead  class="bg-primary text-white">
-        <tr>
-          <th>الرقم</th>
-          <th>الاسم</th>
-          <th>الحالة</th>
+        <tr align="center">    
+          <th>أسم الطريقة</th>
+          <th>حالة الطريقة</th>
           <th>التخفيض</th>
           <th>تعديل</th>
         </tr>
       </thead>
       <tbody >
-        <tr  v-for="(payment,index)  in payments" :key="index" >
-          <td>{{ payment.paymentId }}</td>
-          <td>{{ payment.paymentDes}}  </td>
+        <tr  align="center"  v-for="(payment,index)  in payments" :key="index" >
+        
           <td>
-           
+            <h4> {{ payment.paymentDes}} </h4>
+          </td>
+          <td>           
             <b-form-checkbox id="checkbox1"
                 disabled=""  v-model="payment.status"
                >
             
             </b-form-checkbox>
-
           </td>
-          <td>{{ payment.discount}}  </td>
+          <td>
+            <h4> {{ payment.discount}}% </h4>
+          </td>
           <td>
             <b-button  @click="edit(payment)"  variant="success">
-              <icon icon="list" class="mr-2" />
+              <icon icon="edit" class="mr-2" />
             </b-button>
           </td>
            
@@ -144,8 +145,8 @@
   position: absolute;
   top: 0;
   left: 44;
-  height: 25px;
-  width: 25px;
+  height: 40px;
+  width: 40px;
   background-color: #fff;
   }
 
@@ -175,7 +176,7 @@
   .container .checkmark:after {
   left: 9px;
   top: 5px;
-  width: 5px;
+  width: 10px;
   height: 10px;
   border: solid white;
   border-width: 0 3px 3px 0;

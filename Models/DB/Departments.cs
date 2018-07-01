@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Vue2Spa.Models.DB
@@ -7,5 +7,7 @@ namespace Vue2Spa.Models.DB
     {
         public int DepId { get; set; }
         public string DepDesc { get; set; }
+        public int GroupId { get; set; }
+        
     }
 }

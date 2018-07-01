@@ -11,10 +11,10 @@
 
             <transition name="slide">
                 <div :class="'collapse navbar-collapse' + (!collapsed ? ' show':'')" v-show="!collapsed">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item" v-for="(route, index) in routes" :key="index">
-                            <router-link :to="route.path" exact-active-class="active">
-                                <icon :icon="route.icon" class="mr-2" /><span>{{ route.display }}</span> 
+                    <ul class=" mr-auto">
+                        <li  class="nav-item" v-for="(route, index) in routes" :key="index">
+                            <router-link v-if="route.Primet" :to="route.path" exact-active-class="active">
+                                <icon :icon="route.icon"  /><span>   {{ route.display }}</span> 
                             </router-link>
                         </li>
                     </ul>

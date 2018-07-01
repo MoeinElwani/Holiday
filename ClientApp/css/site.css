@@ -1,7 +1,7 @@
 /* This file should be reviewed. It's not optimal, but it works for now. */
 .navbar {
     display: list-item;
-   
+   direction:rtl;
 }
 
 /* Highlighting rules for nav menu items */
@@ -27,6 +27,7 @@
     right: 0;
     z-index: 1;
     float: right;
+    direction:rtl;
 }
 
 @media (max-width: 767px) {
@@ -41,10 +42,11 @@
     .main-nav {
         height: 100%;
         width: calc(15% - 20px);
+        float: right;
     }    
     .main-nav .navbar {
         border-radius: 0px;
-        border-width: 10px;
+        border-width: 1px;
         height: 100%;
     }
     .navbar-expand-md .navbar-nav {
@@ -58,18 +60,23 @@
         border-top: 1px solid #444;
         padding: 0px;
         width: 100px;
+        float: right;
     }
     .navbar-collapse ul {
         float: right;
+       
     }
     .nav-item {
+        list-style-type: none;
         float: right;
-        font-size: 15px;
-        margin: 6px;
+        font-size: 20px;
+        margin: 5px;
+        font-family: "Times New Roman", Times, serif;
     }
     .nav-item a {
+
         padding: 10px 16px;
-        border-radius: 4px;
+        border-radius: 8px;
         color: white;
     }
     

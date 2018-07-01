@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Vue2Spa.Models.DB;
+
 
 
 
@@ -17,6 +18,8 @@ namespace Vue2Spa.Controllers
         public PaymentController(POSDBContext context)
         {
             _context = context;
+            //if (HttpContext.Session.GetString("_Name") == null)
+            //    _context = context;
         }
      
         [HttpGet("[action]")]
@@ -52,8 +55,8 @@ namespace Vue2Spa.Controllers
 
 
         }
-        
-
+     
+     
         [HttpGet("[action]")]
         public ActionResult GetActivePayments()
         {

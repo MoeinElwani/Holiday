@@ -24,7 +24,8 @@ export default {
   computed: {
 
 
-    itemss() {    //referebced in your template just as booksList
+    itemss() {
+    this.showblock = true  //referebced in your template just as booksList
       return this.items.map((b) => {
         this.itemstoedit=[]
         if (b.discount > 0)
@@ -45,20 +46,31 @@ export default {
         else
           b.discount = '%0 بدون '
 
-        //if (!b.snF)
-        //  b.snF = this.isselected(b)
-       
-        b.groupId = this.getgroupname(b.groupId) 
+
+        if (b.daysReverse>0)
+          b.daysReverse = b.daysReverse + ' خاص ' 
+        else if (b.daysReverse == -1)
+          b.daysReverse = 'غير قابلة'
+        else
+          b.daysReverse = this.getgroupDayes(b.groupId) + ' مجموعة '
+
+        if (!b.stopSaleF)
+          b.stopSaleF = "موقوف"
+        else
+          b.stopSaleF = "متاح"
+
+        b.enNum = this.getgroupname(b.groupId) 
+      
+        b.compId = this.GetCompanyName(b.compId)
+        this.showblock = false
         return b
       })
+  
     },
     
     filterditems: function () {
       return filters[this.visibility](this.itemss);
-    }
-    ,
-  
-
+    },
     totalPages: function () {
       return Math.ceil(this.total / this.pageSize)
     },
@@ -76,6 +88,7 @@ export default {
     },
     selected: function ()
     {
+      this.GetDepartmentbyGroupId()
       this.GetItemsByName()
     }
     ,
@@ -89,16 +102,27 @@ export default {
     selectedtypes: function ()
     {
       this.GetItemsByName()
-    }
-   
+    },
+    selectedcompaies: function () {
+      this.GetItemsByName()
+    },
+    pageSize: function () {
+      this.pageSize = parseInt(this.pageSize)
+
+      this.GetItemsByName()
+    },
     },
 
   data() {
  
     return {
+      format: ' yyyy - MM - dd ',
+      type: 'fmt',
+      autoUpdate: false,
+
 
       currentPage: 1,
-      pageSize: 15,
+      pageSize: 5,
       page:1,
       total:0,
 
@@ -116,7 +140,7 @@ export default {
 
       showblock: false,
       error: 'خطأ!',
-
+      compaies:[],
       groups: [],
       types: [],
       typesbydep:[],
@@ -132,18 +156,31 @@ export default {
         { text: 'ترجيع', value: 2 },
         { text: 'بدون ترجيع', value: -2 },
         { text: 'ترجيع على المجموعة', value: 20 },
+
+        { text: 'أيقاف البيع', value: 31 },
+        { text: 'أتاحة البيع', value: 30 },
       ]
     ,
       selectedprocess: 1,
       selectedtypes: null,
-      selected: 1,
+      selected: 0,
       selecteddepartment: null,
-      group: { groupId: -1, groupDes: 'الكل', typeId: 0, isReversabel: false, daysReverse: 0, discount: 0 }
+      selectedcompaies: 0,
+      group: { groupId: 0, groupDes: 'الكل', typeId: 0, isReversabel: false, daysReverse: 0, discount: 0 }
     }
   },
   
   methods: {
-   checkboxToggle()
+    formatPrice(value) {
+      let val = (value / 1).toFixed(2)
+
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+    },
+
+    frontEndDateFormat: function (date) {
+      return moment(date, 'YYYY-MM-DD').format('DD/MM/YYYY');
+    },
+    checkboxToggle()
    {     
       var temp = []
       if (this.selectalltype == 'معالجة الأصناف المحددة')
@@ -232,16 +269,16 @@ export default {
         //  this.searshname = ' '
         var from = (this.currentPage - 1) * (this.pageSize)
         var to = from + this.pageSize
-
+        console.log(from + "+" + to + "--" + this.pageSize)
 
         if (!this.selecteddepartment)
          this.selecteddepartment = -1 
 
         if (!this.selectedtypes)
           this.selectedtypes = -1
-        this.message= "جاري تحميل الأصناف"
-        this.showblock = true
-        this.$http.get(`/api/items/SearshByName?from=${from}&to=${to}&name=${this.searshname}&dapid=${this.selecteddepartment}&grpid=${this.selected}&typeid=${this.selectedtypes}`)
+          this.message= "جاري تحميل الأصناف"
+          this.showblock = true
+          this.$http.get(`/api/items/SearshByName?from=${from}&to=${to}&name=${this.searshname}&comid=${this.selectedcompaies}&dapid=${this.selecteddepartment}&grpid=${this.selected}&typeid=${this.selectedtypes}`)
           .then(response => {
             this.showblock = false;
 
@@ -308,7 +345,7 @@ export default {
             if (response.data.errorCode == 0) {
               this.groups = response.data.groups
               this.groups.push(this.group)
-              
+              this.groups.reverse()
             }
             else
               window.alert(response.data.errorCode)
@@ -318,6 +355,34 @@ export default {
           })
           .catch((error) => console.log(error))
       
+
+      } catch (err) {
+        window.alert(err)
+        console.log(err)
+
+      }
+    }
+    , GetCompaies() {
+      try {
+
+        let response = this.$http.get(`/api/items/GetAllCompanies`)
+          .then(response => {
+
+            if (response.data.errorCode == 0) {
+              {
+              this.compaies = response.data.companies
+                this.compaies.push({ compDes: 'الكل', compId: 0 })
+                this.compaies.reverse()
+              }
+            }
+            else
+              window.alert(response.data.errorCode)
+
+
+
+          })
+          .catch((error) => console.log(error))
+
 
       } catch (err) {
         window.alert(err)
@@ -372,6 +437,26 @@ export default {
         console.log(err)
       }
     }
+    , GetDepartmentbyGroupId(gId) {
+      var gId = this.selected
+      try {
+
+        let response = this.$http.get(`/api/items/GetDepartmentbyGroupId?gId=${gId} `)
+          .then(response => {
+            if (response.data.errorCode == 0) {
+              this.departments = response.data.departments
+            }
+            else
+              window.alert(response.data.errorCode)
+          })
+          .catch((error) => console.log(error))
+
+
+      } catch (err) {
+        window.alert(err)
+        console.log(err)
+      }
+    }
     , setdiscount(group)
     {
       for (var i = 0; i < this.groups.length; i++)
@@ -403,6 +488,18 @@ export default {
       for (var i = 0; i < this.groups.length; i++)
         if (this.groups[i].groupId == group)
           return this.groups[i].groupDes
+    },
+    GetCompanyName(company)
+    {
+      for (var i = 0; i < this.compaies.length; i++)
+        if (this.compaies[i].compId == company)
+          return this.compaies[i].compDes
+
+    },
+    getgroupDayes(group) {
+      for (var i = 0; i < this.groups.length; i++)
+        if (this.groups[i].groupId == group)
+          return this.groups[i].daysReverse
     }
   }
   ,
@@ -412,7 +509,8 @@ export default {
     this.GetGroups()
     this.GetDepartments()
     this.GetTypebyDepartments()
-
+    this.GetCompaies()
+      
 
   }
 }

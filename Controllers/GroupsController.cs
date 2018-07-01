@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vue2Spa.Models.DB;
+using System.Data.Entity;
 
 
 namespace Vue2Spa.Controllers
@@ -91,8 +92,7 @@ namespace Vue2Spa.Controllers
 
         }
 
-
-
+       
         public IActionResult Index()
         {
             return View();

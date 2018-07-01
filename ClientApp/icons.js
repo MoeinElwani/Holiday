@@ -10,9 +10,22 @@ fontawesome.library.add(
   require('@fortawesome/fontawesome-free-solid/faGraduationCap'),
   require('@fortawesome/fontawesome-free-solid/faHome'),
   require('@fortawesome/fontawesome-free-solid/faList'),
+  require('@fortawesome/fontawesome-free-solid/famoneybill'),
+  require('@fortawesome/fontawesome-free-solid/farecycle'),
+  require('@fortawesome/fontawesome-free-solid/faimage'),
+  require('@fortawesome/fontawesome-free-solid/faobjectungroup'),
+  require('@fortawesome/fontawesome-free-solid/famoneybillwave'),
+  require('@fortawesome/fontawesome-free-solid/faedit'),
+  require('@fortawesome/fontawesome-free-solid/fasearch'),
+  require('@fortawesome/fontawesome-free-solid/fastopcircle'),
+  require('@fortawesome/fontawesome-free-solid/facartplus'),
 
+  require('@fortawesome/fontawesome-free-solid/faboxopen'),
 
-   
+  
+
+  
+
   require('@fortawesome/fontawesome-free-solid/faSpinner'),
   // Brands
   require('@fortawesome/fontawesome-free-brands/faFontAwesome'),

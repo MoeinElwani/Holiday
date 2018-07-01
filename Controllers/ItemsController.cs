@@ -22,6 +22,71 @@ namespace POS.Holiday.Controllers
             _context = context;
         }
 
+        [HttpPost("[action]")]
+        public ActionResult Login([FromBody] JObject body)
+        {
+            dynamic itemsB = body;
+            int userId = (int)itemsB.userId;
+            string Password = (string)itemsB.password; ;
+            try
+            {
+                var db = _context;
+                var CurrentUser = (from u in db.CasherInfo
+                                   where u.OperId== userId
+                                   select u
+                                   ).SingleOrDefault();
+
+
+                if (CurrentUser == null)
+                {
+                    return Json(new { ErrorCode = 990, Message = "المستخدم غير موجود" });
+                }
+                else if (CurrentUser.IsActiveAccount != true)
+                {
+                    return Json(new { ErrorCode = 991, Message = "المستخدم موقوف" });
+                }
+                else if (CurrentUser.Password != Password)
+                {
+                    return Json(new { ErrorCode = 999, Message = " الرقم السري غير صحيح" });
+                }
+                db.SaveChanges();
+
+                HttpContext.Session.SetInt32("UserId", CurrentUser.OperId);
+
+
+                return Json(new { ErrorCode = 0, Message = "Login Success" });
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ErrorCode = 1, Message = ex.Message.ToString() });
+            }
+
+        }
+
+        [HttpPost("[action]")]
+        public ActionResult IsLogin()
+        {
+           
+            try
+            {
+               
+
+              if( HttpContext.Session.GetInt32("UserId")==null)
+                    return Json(new { ErrorCode = 445, Message = "" });
+
+
+
+                return Json(new { ErrorCode = 0, Message = "" });
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ErrorCode = 1, Message = ex.Message.ToString() });
+            }
+
+        }
+
         [HttpGet("[action]")]
         public ActionResult GetAllItems([FromQuery(Name = "from")] int from = 0, [FromQuery(Name = "to")] int to = 4)
         {
@@ -75,7 +140,7 @@ namespace POS.Holiday.Controllers
         }
           
         [HttpGet("[action]")]
-        public ActionResult SearshByName([FromQuery(Name = "name")] string name , [FromQuery(Name = "dapid")] int dapid, [FromQuery(Name = "grpid")] int grpid, [FromQuery(Name = "typeid")] int typeid, [FromQuery(Name = "from")] int from = 0, [FromQuery(Name = "to")] int to = 4)
+        public ActionResult SearshByName([FromQuery(Name = "name")] string name, [FromQuery(Name = "comid")] int comid, [FromQuery(Name = "dapid")] int dapid, [FromQuery(Name = "grpid")] int grpid, [FromQuery(Name = "typeid")] int typeid, [FromQuery(Name = "from")] int from = 0, [FromQuery(Name = "to")] int to = 4)
     {
             var quantity = to - from;
 
@@ -90,12 +155,12 @@ namespace POS.Holiday.Controllers
             }
             try
             {
-                if (name is null )
+                if (grpid == 0)
                 {
-                    if (dapid == -1)
+                    if (comid == 0)
                     {
                         var Items = (from m in _context.Master
-                                     where  m.GroupId == grpid
+
                                      select m).ToList();
                         var result = new
                         {
@@ -108,10 +173,75 @@ namespace POS.Holiday.Controllers
                     }
                     else
                     {
-                        if (typeid != -1)
+                        var Items = (from m in _context.Master
+                                     where m.CompId==comid
+                                     select m).ToList();
+                        var result = new
+                        {
+
+                            ErrorCode = 0,
+                            Items = Items.Skip(from).Take(quantity).ToArray(),
+                            Count = Items.Count,
+                        };
+                        return Ok(result);
+                    }
+                }
+
+                if (comid == 0)
+                {
+                    if (name is null)
+                    {
+                        if (dapid == -1)
                         {
                             var Items = (from m in _context.Master
-                                         where  m.GroupId == grpid && m.DepId == dapid && m.TypeId == typeid
+                                         where m.GroupId == grpid
+                                         select m).ToList();
+                            var result = new
+                            {
+
+                                ErrorCode = 0,
+                                Items = Items.Skip(from).Take(quantity).ToArray(),
+                                Count = Items.Count,
+                            };
+                            return Ok(result);
+                        }
+                        else
+                        {
+                            if (typeid != -1)
+                            {
+                                var Items = (from m in _context.Master
+                                             where m.GroupId == grpid && m.DepId == dapid && m.TypeId == typeid
+                                             select m).ToList();
+                                var result = new
+                                {
+                                    Count = Items.Count,
+                                    ErrorCode = 0,
+                                    Items = Items.Skip(from).Take(quantity).ToArray()
+                                };
+                                return Ok(result);
+                            }
+                            else
+                            {
+                                var Items = (from m in _context.Master
+                                             where m.GroupId == grpid && m.DepId == dapid
+                                             select m).ToList();
+                                var result = new
+                                {
+                                    Count = Items.Count,
+                                    ErrorCode = 0,
+                                    Items = Items.Skip(from).Take(quantity).ToArray()
+                                };
+                                return Ok(result);
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        if (dapid == -1)
+                        {
+                            var Items = (from m in _context.Master
+                                         where m.ItemName.Contains(name) && m.GroupId == grpid
                                          select m).ToList();
                             var result = new
                             {
@@ -123,66 +253,134 @@ namespace POS.Holiday.Controllers
                         }
                         else
                         {
+                            if (typeid != -1)
+                            {
+                                var Items = (from m in _context.Master
+                                             where m.ItemName.Contains(name) && m.GroupId == grpid && m.DepId == dapid && m.TypeId == typeid
+                                             select m).ToList();
+                                var result = new
+                                {
+                                    Count = Items.Count,
+                                    ErrorCode = 0,
+                                    Items = Items.Skip(from).Take(quantity).ToArray()
+                                };
+                                return Ok(result);
+                            }
+                            else
+                            {
+                                var Items = (from m in _context.Master
+                                             where m.ItemName.Contains(name) && m.GroupId == grpid && m.DepId == dapid
+                                             select m).ToList();
+                                var result = new
+                                {
+                                    Count = Items.Count,
+                                    ErrorCode = 0,
+                                    Items = Items.Skip(from).Take(quantity).ToArray()
+                                };
+                                return Ok(result);
+                            }
+
+                        }
+                    }
+                }
+                else
+                {
+                    if (name is null)
+                    {
+                        if (dapid == -1)
+                        {
                             var Items = (from m in _context.Master
-                                         where  m.GroupId == grpid && m.DepId == dapid
+                                         where m.GroupId == grpid && m.CompId==comid
+                                         select m).ToList();
+                            var result = new
+                            {
+
+                                ErrorCode = 0,
+                                Items = Items.Skip(from).Take(quantity).ToArray(),
+                                Count = Items.Count,
+                            };
+                            return Ok(result);
+                        }
+                        else
+                        {
+                            if (typeid != -1)
+                            {
+                                var Items = (from m in _context.Master
+                                             where m.GroupId == grpid && m.DepId == dapid && m.TypeId == typeid && m.CompId == comid
+                                             select m).ToList();
+                                var result = new
+                                {
+                                    Count = Items.Count,
+                                    ErrorCode = 0,
+                                    Items = Items.Skip(from).Take(quantity).ToArray()
+                                };
+                                return Ok(result);
+                            }
+                            else
+                            {
+                                var Items = (from m in _context.Master
+                                             where m.GroupId == grpid && m.DepId == dapid && m.CompId == comid
+                                             select m).ToList();
+                                var result = new
+                                {
+                                    Count = Items.Count,
+                                    ErrorCode = 0,
+                                    Items = Items.Skip(from).Take(quantity).ToArray()
+                                };
+                                return Ok(result);
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        if (dapid == -1)
+                        {
+                            var Items = (from m in _context.Master
+                                         where m.ItemName.Contains(name) && m.GroupId == grpid && m.CompId == comid
                                          select m).ToList();
                             var result = new
                             {
                                 Count = Items.Count,
                                 ErrorCode = 0,
-                                  Items = Items.Skip(from).Take(quantity).ToArray()
+                                Items = Items.Skip(from).Take(quantity).ToArray()
                             };
                             return Ok(result);
                         }
+                        else
+                        {
+                            if (typeid != -1)
+                            {
+                                var Items = (from m in _context.Master
+                                             where m.ItemName.Contains(name) && m.GroupId == grpid && m.DepId == dapid && m.TypeId == typeid && m.CompId == comid
+                                             select m).ToList();
+                                var result = new
+                                {
+                                    Count = Items.Count,
+                                    ErrorCode = 0,
+                                    Items = Items.Skip(from).Take(quantity).ToArray()
+                                };
+                                return Ok(result);
+                            }
+                            else
+                            {
+                                var Items = (from m in _context.Master
+                                             where m.ItemName.Contains(name) && m.GroupId == grpid && m.DepId == dapid && m.CompId == comid
+                                             select m).ToList();
+                                var result = new
+                                {
+                                    Count = Items.Count,
+                                    ErrorCode = 0,
+                                    Items = Items.Skip(from).Take(quantity).ToArray()
+                                };
+                                return Ok(result);
+                            }
 
-                    }
-                }
-                else
-                { 
-                if (dapid == -1)
-                {
-                    var Items = (from m in _context.Master
-                                 where m.ItemName.Contains(name) && m.GroupId==grpid
-                                 select m).ToList();
-                    var result = new
-                    {
-                        Count = Items.Count,
-                        ErrorCode = 0,
-                          Items = Items.Skip(from).Take(quantity).ToArray()
-                    };
-                    return Ok(result);
-                }
-                else 
-                {
-                    if (typeid != -1)
-                    {
-                        var Items = (from m in _context.Master
-                                     where m.ItemName.Contains(name) && m.GroupId == grpid && m.DepId==dapid && m.TypeId==typeid
-                                     select m).ToList();
-                        var result = new
-                        {
-                            Count = Items.Count,
-                            ErrorCode = 0,
-                              Items = Items.Skip(from).Take(quantity).ToArray()
-                        };
-                        return Ok(result);
-                    }
-                    else
-                    {
-                        var Items = (from m in _context.Master
-                                     where m.ItemName.Contains(name) && m.GroupId == grpid && m.DepId == dapid  
-                                     select m).ToList();
-                        var result = new
-                        {
-                            Count = Items.Count,
-                            ErrorCode = 0,
-                            Items = Items.Skip(from).Take(quantity).ToArray()
-                        };
-                        return Ok(result);
+                        }
                     }
 
                 }
-                }
+
             }
             catch (Exception ex)
             {
@@ -213,6 +411,70 @@ namespace POS.Holiday.Controllers
                 {
                     ErrorCode = 0,
                     Departments = Departments
+                };
+                return Ok(result);
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ErrorCode = 2, Message = ex.Message.ToString() });
+            }
+
+
+
+        }
+
+        [HttpGet("[action]")]
+        public ActionResult GetDepartmentbyGroupId([FromQuery(Name = "gId")] int gId)
+        {
+
+            try
+            {
+                var Departments = (from a in _context.Departments
+                                   where a.GroupId==gId
+                                   select new
+                                   {
+                                       DepId = a.DepId,
+                                       DepDesc = a.DepDesc,
+
+                                   }).ToList();
+                var result = new
+                {
+                    ErrorCode = 0,
+                    Departments = Departments
+                };
+                return Ok(result);
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { ErrorCode = 2, Message = ex.Message.ToString() });
+            }
+
+
+
+        }
+
+
+
+        [HttpGet("[action]")]
+        public ActionResult GetAllCompanies()
+        {
+
+            try
+            {
+                var Companies = (from a in _context.CompanyInfo
+
+                                   select new
+                                   {
+                                       CompId = a.CompId,
+                                       CompDes = a.CompDes,
+
+                                   }).ToList();
+                var result = new
+                {
+                    ErrorCode = 0,
+                    Companies = Companies
                 };
                 return Ok(result);
 
@@ -344,6 +606,9 @@ namespace POS.Holiday.Controllers
                             case 2: result.DaysReverse = number; break;
                             case -2: result.DaysReverse = -1; break;
                             case 20: result.DaysReverse = 0; break;
+
+                            case 30: result.StopSaleF = true; break;
+                            case 31: result.StopSaleF = false; break;
                             default:
                                return Json(new { ErrorCode = 22, Message = "خطأ في البيانات " });
                                

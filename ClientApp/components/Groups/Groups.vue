@@ -27,10 +27,9 @@
 
     
         
-    <table class="table borderd">
+    <table class="table borderd  table-striped">
       <thead  class="bg-primary text-white">
         <tr>
-          <th>الرقم</th>
           <th>الاسم</th>
           <th>أيام الأسترجاع</th>
           <th>التخفيض</th>
@@ -39,13 +38,12 @@
       </thead>
       <tbody >
         <tr  v-for="(group,index)  in filterdGroups" :key="index" >
-          <td>{{ group.groupId }}</td>
           <td>{{ group.groupDes}}  </td>
           <td>{{ group.daysReverse}} </td>
           <td>{{ group.discount}} % </td>
           <td>
             <b-button  @click="edit(group)" size="sm" variant="success">
-              <icon icon="list" class="mr-2" />
+              <icon icon="edit" class="mr-2" />
          
             </b-button>
           </td>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Vue2Spa.Models.DB
@@ -24,5 +24,7 @@ namespace Vue2Spa.Models.DB
         public string Note { get; set; }
         public bool? Posted { get; set; }
         public DateTime CreatedDate { get; set; }
+        public int? ParentId { set; get; }
+
     }
 }

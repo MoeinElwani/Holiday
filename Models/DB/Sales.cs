@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Vue2Spa.Models.DB
@@ -15,5 +15,7 @@ namespace Vue2Spa.Models.DB
         public float? DisAmount { get; set; }
         public DateTime? ExpDate { get; set; }
         public short? UnitId { get; set; }
+        
+        public int? ReturenQantity { get; set; }
     }
 }
